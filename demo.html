@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jenny: How It Works</title>
+<style>
+:root{--navy:#1f2a44;--bg:#f3f6fb;--ac:#ff9f43;--blue:#2a7fb8;--green:#2e9e5b;--mut:#5b6785}
+*{box-sizing:border-box;margin:0}
+body{height:100vh;font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--navy);display:flex;flex-direction:column;overflow:hidden}
+header{background:var(--navy);color:#fff;padding:10px 24px;display:flex;justify-content:space-between;font-size:18px}
+header b{color:var(--ac)}
+main{flex:1;position:relative;min-height:0}
+.scene{position:absolute;inset:0;padding:20px 40px;display:none;flex-direction:column}
+.scene.on{display:flex;animation:fade .5s}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+h1{font-size:60px}h2{font-size:32px;margin-bottom:14px}h3{font-size:21px}
+.center{justify-content:center;align-items:center;text-align:center}
+.sub{font-size:26px;color:var(--mut);margin-top:10px}
+.split{display:flex;gap:26px;flex:1;min-height:0}
+.panel{flex:1;background:#fff;border-radius:14px;padding:18px 22px;box-shadow:0 2px 12px #1f2a4418;overflow:hidden;display:flex;flex-direction:column;gap:10px}
+.code{background:#14203a;color:#cfe4ff;border-radius:10px;padding:12px 14px;font:15px/1.5 Consolas,monospace;white-space:pre-wrap}
+.data{background:#f0f8f1;border-left:5px solid var(--green);border-radius:8px;padding:10px 14px;font:15px/1.5 Consolas,monospace;white-space:pre-wrap}
+.feat{list-style:none;max-width:900px;margin:auto}
+.feat li{font-size:28px;margin:14px 0;opacity:0;transform:translateX(-30px);transition:.6s}
+.feat li.show{opacity:1;transform:none}
+/* pipeline */
+.pipe{width:330px;position:relative;display:flex;flex-direction:column;justify-content:space-between;padding-left:34px}
+.node{background:#fff;border:2px solid #cfd8e8;border-radius:12px;padding:7px 14px;font-weight:600;opacity:.4;transition:.4s}
+.node small{display:block;font-weight:400;color:var(--mut);font-size:13px}
+.node.lit{opacity:1;border-color:var(--blue)}
+.node.cur{background:#e6f2fb;transform:scale(1.04);box-shadow:0 4px 14px #2a7fb855}
+#pkt{position:absolute;left:4px;top:0;width:18px;height:18px;border-radius:50%;background:var(--ac);transition:top .7s;box-shadow:0 0 0 6px #ff9f4344}
+/* chat */
+.phone{width:410px;background:#fff;border-radius:18px;box-shadow:0 6px 24px #1f2a4430;display:flex;flex-direction:column;overflow:hidden}
+.hd{background:var(--ac);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;font-weight:bold;font-size:20px}
+#msgs{flex:1;padding:12px;display:flex;flex-direction:column;gap:9px;overflow:hidden;justify-content:flex-end}
+.b{max-width:82%;padding:9px 13px;border-radius:16px;font-size:18px;line-height:1.3}
+.bot{align-self:flex-start;background:#dff3ff}.kid{align-self:flex-end;background:#ffe0e9}
+.new{animation:fade .5s}
+.pill{display:inline-block;padding:4px 16px;border-radius:14px;font-weight:700;font-size:18px;background:#ddd}
+.m-learn{background:#c8f7c5}.m-comfort{background:#ffd6e0}.m-play{background:#fff3a8}.m-chat{background:#e8dcff}
+.rules{list-style:none;font:15px/1.7 Consolas,monospace}
+/* level */
+.lv{width:360px;background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 12px #1f2a4418;display:flex;flex-direction:column;gap:14px;align-items:center}
+.badge{font-size:34px;font-weight:800;color:#fff;background:var(--blue);border-radius:16px;padding:8px 28px;transition:.6s}
+.badge.up{background:var(--green);transform:scale(1.2)}
+.slots{display:flex;gap:8px}
+.slot{width:44px;height:44px;border-radius:10px;border:3px solid #cfd8e8;display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;transition:.4s}
+.slot.f{background:var(--green);border-color:var(--green)}
+.state{font:16px/1.7 Consolas,monospace;background:#f3f6fb;border-radius:10px;padding:10px 14px;width:100%}
+#log div{font:15px/1.5 Consolas,monospace;padding:6px 10px;margin:4px 0;border-radius:8px;background:#f3f6fb;animation:fade .5s}
+#log div.cur{background:#fff3d6;border-left:5px solid var(--ac)}
+/* latency */
+.lat{position:relative;margin-top:10px}
+.rows{padding-left:270px;position:relative}
+.row{display:flex;align-items:center;margin:16px 0;opacity:0;transition:.5s}
+.row.on{opacity:1}
+.row label{position:absolute;left:0;width:260px;font-size:18px;font-weight:600}
+.trk{flex:1;height:34px;background:#e6ebf5;border-radius:8px;position:relative}
+.trk i{display:block;height:100%;width:0;background:var(--blue);border-radius:8px;transition:width 1s}
+.row.on .trk i{width:var(--w)}
+.trk b{position:absolute;top:5px;left:calc(var(--w) + 10px);font-size:17px}
+.mk{position:absolute;top:-34px;bottom:-10px;width:0;border-left:3px dashed;opacity:0;transition:.5s;font-weight:700;font-size:15px}
+.mk span{position:absolute;top:0;left:6px;white-space:nowrap}
+.mk.on{opacity:1}
+#fb{margin-top:30px;opacity:0;transition:.6s;background:#fff3d6;border-left:6px solid var(--ac);border-radius:10px;padding:14px 18px;font-size:20px}
+#fb.on{opacity:1}
+table{border-collapse:collapse;font-size:21px;margin:auto}
+td,th{border:2px solid #d5deee;padding:10px 18px;text-align:left}th{background:var(--navy);color:#fff}
+/* footer */
+footer{background:#fff;border-top:1px solid #d5deee}
+#cap{padding:12px 28px;font-size:21px;min-height:62px;border-left:8px solid var(--ac)}
+.ctl{display:flex;gap:10px;align-items:center;padding:8px 28px}
+button,select{font-size:16px;padding:8px 18px;border:none;border-radius:10px;background:var(--navy);color:#fff;cursor:pointer}
+button.auto{background:var(--green)}
+#bar{flex:1;height:8px;background:#e1e7f3;border-radius:6px;overflow:hidden}
+#bar i{display:block;height:100%;width:0;background:var(--ac);transition:.4s}
+</style>
+</head>
+<body>
+<header><span>🌈 <b>Jenny</b>: English chatbot for children under 7</span><span id="where"></span></header>
+<main>
+<section class="scene center" id="s0"><h1>🌈 Jenny</h1><p class="sub">An English learning chatbot for children under 7</p><p class="sub">How it works, step by step</p></section>
+
+<section class="scene" id="s1"><h2>What Jenny does</h2><ul class="feat">
+<li>📚 <b>3 levels:</b> single words, tiny sentences, short Q&amp;A</li>
+<li>🧭 <b>4 modes:</b> learn, chat, play, comfort</li>
+<li>💛 <b>Social and emotional learning:</b> praise effort, name feelings</li>
+<li>🧠 <b>Context aware:</b> level, score, mistakes, last 6 messages</li>
+<li>⚡ <b>Fast:</b> one LLM call, under 2 seconds</li></ul></section>
+
+<section class="scene" id="s2"><h2>Architecture: what happens to one message</h2>
+<div class="split"><div class="pipe" id="pipe"><div id="pkt"></div></div>
+<div class="panel"><h3 id="pt"></h3><pre class="code" id="pc"></pre><pre class="data" id="pd"></pre></div></div></section>
+
+<section class="scene" id="s3"><h2>Mode detection: the bot does not teach every turn</h2>
+<div class="split"><div class="phone"><div class="hd"><span>🌈 Jenny</span><span id="stat"></span></div><div id="msgs"></div></div>
+<div class="panel"><h3>Behind the scenes</h3><div>Child says: <b id="ik"></b></div>
+<ul class="rules" id="ir"></ul><div>Decision: <span class="pill" id="im"></span> &nbsp; Mood: <b id="imd"></b></div><div class="data" id="ie" style="font-family:inherit;font-size:17px"></div></div></div></section>
+
+<section class="scene" id="s4"><h2>Level up: what actually happens in the code</h2>
+<div class="split"><div class="lv"><div class="badge" id="lb">Level 1</div><div class="slots" id="slots"></div>
+<div>Correct in a row</div><div class="state" id="stt"></div><div class="b bot new" id="lr" style="display:none"></div></div>
+<div class="panel"><h3>What happened</h3><div id="log"></div></div></div></section>
+
+<section class="scene" id="s5"><h2>Speed: the 2-second requirement</h2>
+<div class="lat"><div class="rows">
+<div class="mk on" id="m2" style="left:calc(270px + (100% - 270px) * 1);border-color:#d64545;color:#d64545"><span style="left:-110px">2000 ms limit</span></div>
+<div class="mk" id="m1" style="left:calc(270px + (100% - 270px) * .6);border-color:var(--ac);color:#b86a00"><span>1200 ms timeout</span></div>
+<div class="row" id="r1"><label>Rules: mode, grading, level</label><div class="trk" style="--w:1%"><i></i><b>about 1 ms</b></div></div>
+<div class="row" id="r2"><label>LLM call (Groq)</label><div class="trk" style="--w:35%"><i></i><b>about 700 ms</b></div></div>
+<div class="row" id="r3"><label>Total reply time</label><div class="trk" style="--w:36%"><i></i><b>about 715 ms</b></div></div></div>
+<div id="fb">⏱ If the LLM is slower than 1.2 s, fails, or returns empty text, <b>fallback_reply(mode)</b> answers instantly. The child never sees a frozen or blank bubble.</div></div></section>
+
+<section class="scene center" id="s6"><h2>Tools and trade-offs</h2><table>
+<tr><th>Choice</th><th>Why</th><th>Trade-off</th></tr>
+<tr><td>Flask + plain JS</td><td>Simple, no build step</td><td>Basic UI</td></tr>
+<tr><td>Rules for modes</td><td>Instant, predictable</td><td>Keywords can miss</td></tr>
+<tr><td>Groq LLM</td><td>Very fast replies</td><td>External service</td></tr>
+<tr><td>In-memory sessions</td><td>No database needed</td><td>Reset on restart</td></tr>
+<tr><td>Fallback replies</td><td>Bot never freezes</td><td>Less natural text</td></tr>
+<tr><td>Render free plan</td><td>Live URL from GitHub</td><td>Cold start when idle</td></tr></table></section>
+
+<section class="scene center" id="s7"><h2>Try it</h2><p class="sub">Live: <b>kids-english-bot.onrender.com</b></p><p class="sub">Code: <b>github.com/Jalalab/kids-english-bot</b></p><p class="sub">Thank you!</p></section>
+</main>
+<footer><div id="cap"></div>
+<div class="ctl"><button id="bp">◀ Prev</button><button id="ba" class="auto">▶ Auto</button><button id="bn">Next ▶</button>
+<select id="spd"><option value="2500">Fast</option><option value="3200" selected>Normal</option><option value="4500">Slow</option></select>
+<button id="br">↺</button><div id="bar"><i></i></div></div></footer>
+
+<script>
+const $=s=>document.querySelector(s);
+const tog=(e,c,on)=>e.classList.toggle(c,on);
+
+/* ---- data ---- */
+const P=[
+{n:["Browser","chat UI"],t:"1. The browser sends the message",
+c:`fetch("/chat", { method: "POST",\n  body: JSON.stringify({\n    session_id: "s7k2x9", message: "yellow" }) })`,
+d:`Every browser tab makes a random session id,\nso each tab is one child with its own memory.`,
+cap:"The child types “yellow”. The page sends it to the server with a session id."},
+{n:["Flask server","POST /chat"],t:"2. Flask loads this child’s memory",
+c:`p = get_progress("s7k2x9")`,
+d:`Progress(level=1, score=0, correct_streak=0,\n         last_was_question=True,\n         current_item="What color is the sun?")`,
+cap:"The server finds the child’s progress object. It remembers which question was asked."},
+{n:["Mode detector","rules, about 0 ms"],t:"3. Rules choose the mode",
+c:`detect_mode("yellow", last_was_question=True,\n            learn_streak=1)`,
+d:`comfort words?     no\nplay words?        no\nlow-energy reply?  no\nchat words?        no\nlearn_streak >= 2? no\n→ mode = "learn"`,
+cap:"No feeling, play or chat words were found, so the default mode is learn. No AI is used here."},
+{n:["Grade + progress","answer check"],t:"4. Check the answer, update progress",
+c:`correct = check_answer(item, "yellow")\n# "yellow" in ["yellow"]  →  True\np.record_answer(True)`,
+d:`score          0 → 1\ncorrect_streak 0 → 1\nnext_question() → "What color is grass?"`,
+cap:"The answer is correct, so the score goes up and the next lesson question is chosen."},
+{n:["Prompt builder","mode + level + context"],t:"5. Build the instructions for the LLM",
+c:`build_prompt(mode="learn", mood="neutral",\n  level=1, score=1, history=last 6 messages ...)`,
+d:`LEARN mode: react to the child's answer...\nChild's level: 1 - single words. Score: 1.\nThe child's last answer was CORRECT. Praise them.\nYou MUST end your reply with this exact\nquestion: "What color is grass?"`,
+cap:"Rules turn the child’s state into clear instructions. This is how replies stay in context."},
+{n:["LLM + fallback","Groq, timeout 1.2 s"],t:"6. One LLM call with a safety net",
+c:`requests.post(GROQ_URL, timeout=1.2,\n  json={"model": "openai/gpt-oss-20b",\n        "max_tokens": 300,\n        "reasoning_effort": "low"})`,
+d:`Reply received in 712 ms  →  source = "llm"\nTimeout, error or empty text → fallback_reply("learn")`,
+cap:"Only one LLM call per message. If it is slow or fails, a ready-made reply is used."},
+{n:["Response","back to the browser"],t:"7. The reply returns to the screen",
+c:`return jsonify({"reply": ..., "mode": "learn",\n                "level": 1, "score": 1, "ms": 715})`,
+d:`{ "reply": "Great job! 🌟 Yellow is right!\n            What color is grass?",\n  "mode": "learn", "level": 1, "score": 1 }`,
+cap:"The browser shows the bubble and updates the star count. Total time: about 0.7 seconds."}];
+
+const M=[
+{k:"good",b:"Yay! 🌞 Let’s play with colors. What color is the sun?",m:"learn",md:"happy",s:"Level 1 · ⭐ 0",
+r:["comfort words? none","play words? none","chat words? none","learn_streak 0 < 2","→ default: learn"],
+e:"No lesson question was pending, so nothing is graded. The bot asks the first Level 1 question and sets last_was_question = True.",cap:"“good” is a mood answer, so Jenny starts a lesson."},
+{k:"yellow",b:"Great job! 🌟 Yellow is right! What color is grass?",m:"learn",md:"neutral",s:"Level 1 · ⭐ 1",
+r:["comfort words? none","play words? none","chat words? none","→ default: learn"],
+e:"check_answer: “yellow” is in [“yellow”] → correct. record_answer(True): score 1, correct_streak 1. The next question is picked.",cap:"A correct answer: praise, score +1, next question."},
+{k:"i am sad",b:"It’s okay to feel sad. 💛 I’m here with you. Want to hear a happy song?",m:"comfort",md:"upset",s:"Level 1 · ⭐ 1",
+r:["comfort words? “sad” found","→ comfort (checked first, always wins)"],
+e:"Comfort never grades or quizzes. The answer check is skipped, last_was_question = False, and the prompt says: “Do NOT teach and do NOT ask a lesson question.”",cap:"Feelings come first. Jenny names the feeling and stops teaching."},
+{k:"lets play a game",b:"Let’s play! 🎵 Twinkle, twinkle, little star. Can you sing with me?",m:"play",md:"neutral",s:"Level 1 · ⭐ 1",
+r:["comfort words? none","play words? “play” found","→ play"],
+e:"Engagement mode: a riddle, song or game instead of a quiz. learn_streak resets to 0.",cap:"The child wants fun, so Jenny plays instead of quizzing."},
+{k:"my dog is big",b:"Wow, a big dog! 🐶 “Big” is a new word. Can you say big?",m:"chat",md:"neutral",s:"Level 1 · ⭐ 1",
+r:["comfort words? none","play words? none","low-energy reply? no","chat words? “my dog” found","→ chat"],
+e:"Conversation mode: Jenny answers what the child said and adds ONE tiny new word, with no quiz.",cap:"The child shares something, so Jenny chats and slips in one new word."}];
+
+const SS=[[1,0,0,0],[1,1,1,0],[1,2,2,0],[1,3,3,0],[1,4,4,0],[1,5,5,0],[2,5,0,1],[2,5,0,1],[2,5,0,0]];
+const LG=[
+[0,"Start: level = 1, score = 0, correct_streak = 0"],
+[0,"Rule: 5 correct answers in a row = level up (LEVEL_UP_STREAK = 5)"],
+[1,"Answer 1 correct → score 1, correct_streak 1"],
+[2,"Answer 2 correct → score 2, correct_streak 2"],
+[3,"Answer 3 correct → score 3, correct_streak 3"],
+[4,"Answer 4 correct → score 4, correct_streak 4"],
+[5,"Answer 5 correct → score 5, correct_streak 5"],
+[5,"Check: correct_streak (5) >= 5 and level (1) < MAX_LEVEL (3) → TRUE"],
+[6,"level = 2 · correct_streak = 0 · item_index = 0 · level_changed = \"up\""],
+[7,"The prompt gets: “The child just moved UP a level! Celebrate it.”"],
+[7,"The next question now comes from Level 2: “Say it with me: I see a cat.”"],
+[8,"Opposite rule: 3 wrong in a row (LEVEL_DOWN_STREAK = 3) → level − 1. Jenny says “it’s okay, let’s practice” and never says “wrong”."]];
+const LC=["Level 1 starts at zero. Five correct answers in a row will move the child up.",
+"The rule is simple and fast: it is plain code, not AI.",
+"Answer 1 is correct. The streak counter goes to 1.","Answer 2 is correct. The streak is 2.","Answer 3 is correct. The streak is 3.","Answer 4 is correct. One more to go.",
+"Answer 5 is correct. The streak reaches the limit of 5.",
+"The code resets the streak and moves the child to Level 2 with a fresh list of questions.",
+"Jenny is told to celebrate, and asks the first Level 2 question.",
+"If the child struggles, 3 wrong answers in a row move them down one level, kindly."];
+
+/* ---- scene renderers ---- */
+const pipe=$("#pipe");
+P.forEach(p=>{const d=document.createElement("div");d.className="node";d.innerHTML=p.n[0]+"<small>"+p.n[1]+"</small>";pipe.appendChild(d)});
+const nodes=[...pipe.querySelectorAll(".node")];
+const slots=$("#slots");for(let i=0;i<5;i++){const d=document.createElement("div");d.className="slot";slots.appendChild(d)}
+
+function rFeat(st){document.querySelectorAll(".feat li").forEach((l,i)=>tog(l,"show",i<=st))}
+function rPipe(st){
+  nodes.forEach((n,i)=>{tog(n,"lit",i<=st);tog(n,"cur",i==st)});
+  const n=nodes[st];$("#pkt").style.top=(n.offsetTop+n.offsetHeight/2-9)+"px";
+  $("#pt").textContent=P[st].t;$("#pc").textContent=P[st].c;$("#pd").textContent=P[st].d}
+function rChat(st){
+  const box=$("#msgs");box.innerHTML="";
+  const add=(t,c,nw)=>{const d=document.createElement("div");d.className="b "+c+(nw?" new":"");d.textContent=t;box.appendChild(d)};
+  add("Hi! I’m Jenny 😊 How are you feeling today?","bot");
+  for(let i=0;i<=st;i++){add(M[i].k,"kid",i==st);add(M[i].b,"bot",i==st)}
+  const m=M[st];$("#stat").textContent=m.s;$("#ik").textContent="“"+m.k+"”";
+  $("#ir").innerHTML=m.r.map(x=>"<li>"+(x.startsWith("→")?"<b>":"")+x+(x.startsWith("→")?"</b>":"")+"</li>").join("");
+  const p=$("#im");p.className="pill m-"+m.m;p.textContent=m.m;$("#imd").textContent=m.md;$("#ie").textContent=m.e}
+function rLevel(st){
+  const s=SS[st];
+  const b=$("#lb");b.textContent="Level "+s[0];tog(b,"up",s[0]==2);
+  slots.childNodes.forEach((d,i)=>{tog(d,"f",i<s[2]);d.textContent=i<s[2]?"✓":""});
+  $("#stt").textContent="level          = "+s[0]+"\nscore          = "+s[1]+"\ncorrect_streak = "+s[2]+"\nlevel_changed  = "+(s[3]?"\"up\"":"None");
+  const r=$("#lr");r.style.display=st>=7?"block":"none";r.textContent="Wow, you moved up to Level 2! 🎉 Say it with me: I see a cat. What do you see?";
+  const shown=LG.filter(x=>x[0]<=st);
+  $("#log").innerHTML=shown.map((x,i)=>"<div"+(x[0]==st?" class=cur":"")+">"+x[1].replace(/</g,"&lt;")+"</div>").join("")}
+function rLat(st){
+  tog($("#r1"),"on",st>=1);tog($("#r2"),"on",st>=2);tog($("#r3"),"on",st>=2);
+  tog($("#m1"),"on",st>=3);tog($("#fb"),"on",st>=3)}
+
+/* ---- scene list ---- */
+const S=[
+{id:"s0",name:"Intro",cap:["Jenny teaches English to children under 7, and notices how they feel."]},
+{id:"s1",name:"Features",r:rFeat,cap:["Three levels make learning gradual.","Four modes mean Jenny does not teach in every message.","Emotional support: she praises effort and names feelings.","Every reply uses the child’s level, score, mistakes and recent chat.","One short LLM call keeps every reply under 2 seconds."]},
+{id:"s2",name:"Architecture",r:rPipe,cap:P.map(p=>p.cap)},
+{id:"s3",name:"Modes",r:rChat,cap:M.map(m=>m.cap)},
+{id:"s4",name:"Level up",r:rLevel,cap:LC},
+{id:"s5",name:"Speed",r:rLat,cap:["The brief requires replies in under 2 seconds.","Rules (modes, grading, levels) cost about 1 millisecond.","The single LLM call takes about 700 ms, so the total is about 0.7 s.","A 1.2 s timeout plus fallback replies guarantee the bot never freezes."]},
+{id:"s6",name:"Trade-offs",cap:["Simple choices that favor speed, safety and a live URL, each with a known limit."]},
+{id:"s7",name:"Links",cap:["Open the live link, or read the code and documents in the GitHub repo."]}];
+const flat=[];S.forEach((s,i)=>s.cap.forEach((_,j)=>flat.push([i,j])));
+let idx=0,timer=null;
+
+function go(i){
+  idx=Math.max(0,Math.min(flat.length-1,i));
+  const [si,st]=flat[idx];
+  S.forEach((s,k)=>tog($("#"+s.id),"on",k==si));
+  if(S[si].r)S[si].r(st);
+  $("#cap").textContent=S[si].cap[st];
+  $("#where").textContent=(si+1)+" / "+S.length+" · "+S[si].name;
+  $("#bar i").style.width=((idx+1)/flat.length*100)+"%"}
+function auto(on){
+  clearInterval(timer);timer=null;
+  if(on)timer=setInterval(()=>{if(idx>=flat.length-1){auto(false)}else go(idx+1)},+$("#spd").value);
+  $("#ba").textContent=on?"⏸ Pause":"▶ Auto"}
+$("#bn").onclick=()=>go(idx+1);$("#bp").onclick=()=>go(idx-1);
+$("#ba").onclick=()=>{if(!timer&&idx>=flat.length-1)go(0);auto(!timer)};
+$("#br").onclick=()=>{auto(false);go(0)};
+$("#spd").onchange=()=>{if(timer)auto(true)};
+document.addEventListener("keydown",e=>{
+  if(e.key=="ArrowRight"||e.key==" "){e.preventDefault();go(idx+1)}
+  if(e.key=="ArrowLeft")go(idx-1);
+  if(e.key=="a")$("#ba").click()});
+go(0);
+</script>
+</body>
+</html>
