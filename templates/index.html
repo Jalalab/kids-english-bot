@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chat with Jenny</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>🌈 Jenny</h1>
+      <div id="stats">Level 1 · ⭐ 0</div>
+    </header>
+
+    <div id="chat"></div>
+
+    <div id="quick">
+      <button class="q" data-msg="Yes">👍 Yes</button>
+      <button class="q" data-msg="Next">➡️ Next</button>
+      <button class="q" data-msg="Let's play a game">🎮 Play</button>
+      <button class="q" data-msg="I am sad">😢 Sad</button>
+    </div>
+
+    <div class="input-row">
+      <input id="msg" type="text" placeholder="Type here..." autocomplete="off">
+      <button id="send">Send</button>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='chat.js') }}"></script>
+</body>
+</html>
