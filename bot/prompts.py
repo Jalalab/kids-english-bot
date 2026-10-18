@@ -52,7 +52,7 @@ def build_prompt(mode, mood, level, score, topics, mistakes, history,
         elif feedback == "wrong":
             lines.append("The child's last answer was NOT right. Be kind, say it is okay, and give a tiny hint. Do not say 'wrong'.")
         if level_changed == "up":
-            lines.append("The child just moved UP a level! Celebrate it.")
+               lines.append("The child just moved UP a level! Celebrate it.")
         elif level_changed == "down":
             lines.append("We are going back one level to practice. Say it is okay and fun to practice.")
         if next_question:
