@@ -28,7 +28,7 @@ def fallback_reply(mode, feedback=None, next_question=None, level_changed=None):
     # learn mode
     parts = []
     if level_changed == "up":
-        parts.append("Wow, you moved up a level! 🎉")
+        parts.append("Congratulations! 🎉 You are now in the next level! Great job!")
     elif level_changed == "down":
         parts.append("Let's practice a bit more, it's fun! 😊")
     elif feedback == "correct":
