@@ -103,14 +103,6 @@ adapt to the child's history.
 - The system prompt limits replies to 2 short, kind sentences.
 - No accounts and no data stored beyond the session in memory.
 
-## 12. Performance results
-
-Replace the numbers below with your own results:
-
-- Average latency: ___ ms
-- Worst case: ___ ms
-- Replies under 2 seconds: ___ / ___
-- Fallback replies: ___
 
 ## 13. Limitations and future work
 
